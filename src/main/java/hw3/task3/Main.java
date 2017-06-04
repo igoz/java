@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -19,8 +21,10 @@ public class Main {
         boolean isOrder = true;
 
         try (BufferedReader br = new BufferedReader(reader)) {
-            Pattern orderPattern = Pattern.compile("\\([Рр]ис(\\. )(\\d+)([^)]*)\\)");
-            Pattern sentencePattern = Pattern.compile("([А-Я][^.]*)\\([Рр]ис( )(\\d+)([^)]*)\\)[^.]*\\.");
+            Pattern orderPattern = Pattern.compile("\\([Рр]ис(\\. )(\\d+)([^)]*)\\)", Pattern.MULTILINE);
+            Pattern sentencePattern = Pattern.compile("([А-Я][^.]*)\\([Рр]ис( )(\\d+)([^)]*)\\)[^.]*\\.", Pattern.MULTILINE);
+
+            Set<String> sentences = new HashSet<>();
 
             //Создается много строк, не придумал как избежать
             while (br.ready()) {
@@ -37,26 +41,38 @@ public class Main {
                 }
 
                 Matcher matcher = orderPattern.matcher(result);
-                if (matcher.find()) {
+                while (matcher.find()) {
                     if (isOrder) {
                         lastImgIdx = currImgIdx;
                         currImgIdx = Integer.parseInt(matcher.group(2));
 
-                        System.out.println(matcher.group(2));
-
                         if (currImgIdx - lastImgIdx != 1 && lastImgIdx != 0) {
-                            System.out.println("Ссылки на рисунки не последовательны.");
+                            System.out.printf("Ссылки на рисунки не последовательны. Last: %d, Current: %d\n",
+                                    lastImgIdx, currImgIdx);
 //                            isOrder = false;
+                        } else {
+                            System.out.printf("Ссылки на рисунки последовательны. Last: %d, Current: %d\n",
+                                    lastImgIdx, currImgIdx);
                         }
-                        System.out.println("found: " + matcher.group(0).replace(".", ""));
+//                        System.out.println("found: " + matcher.group(0).replace(".", ""));
 
-                        String replaced = matcher.replaceAll(matcher.group(0).replace(".", ""));
+                        String replaced = result.replace("ис.", "ис");
+//                        System.out.println("Replaced: " + replaced);
+
                         Matcher matcherSentence = sentencePattern.matcher(replaced);
-                        if (matcherSentence.find()) {
-                                System.out.println(matcherSentence.group(0));
+                        while (matcherSentence.find()) {
+                            sentences.add(matcherSentence.group(0));
                         }
                     }
                 }
+            }
+
+            System.out.println("Предложения со ссылками на ресурсы:");
+
+            for (String sentence : sentences) {
+                sentence = sentence.replace("Рис ", "Рис. ");
+                sentence = sentence.replace("рис ", "рис. ");
+                System.out.println(sentence);
             }
 //            Matcher matcher = pattern.matcher(result);
 //            while (matcher.find()) {
