@@ -1,0 +1,7 @@
+List of available commands:
+dir [path] - view the content of given directory.
+file [path] - view the content of given file.
+create [path] - create new txt file.
+append [path] - append text to already existing file.
+delete [path] - delete file.
+stop - exit.
