@@ -1,23 +1,26 @@
-package hw5.task2;
-
-import com.sun.javafx.fxml.PropertyNotFoundException;
+package hw6.task2;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
+/**
+ * Map, при добавлении нового значения с уже существующим ключом, перезаписывает существующую запись
+ */
 public class Main {
-    static Properties properties = new Properties();
-
     public static void main(String[] args) {
         try {
+            Properties properties = new Properties();
             String fileName = "file.properties";
             properties.load(getStream(fileName));
-            String key = "key";
-            String property = properties.getProperty(key, "");
-            if (property.equals("")) {
-                throw new PropertyNotFoundException(key + " was not found in " + fileName);
+
+            Map<String, String> propertiesMap = new HashMap<>();
+
+            for (String s : properties.stringPropertyNames()) {
+                properties.put(s, properties.getProperty(s));
             }
         } catch (IOException e) {
             e.printStackTrace();
